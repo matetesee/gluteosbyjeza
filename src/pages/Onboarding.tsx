@@ -1,6 +1,7 @@
 import { useState } from "react";
-import type { Frequency, Goal, Language, Level, OnboardingData } from "../types";
+import type { Frequency, OnboardingData } from "../types";
 import { initialOnboardingData } from "../types";
+import { getDictionary } from "../i18n";
 import {
   Card,
   GhostButton,
@@ -12,70 +13,6 @@ import {
 
 const TOTAL_STEPS = 6;
 
-const LANGUAGES: { code: Language; label: string; sub: string }[] = [
-  { code: "es", label: "Español", sub: "Español (América Latina / España)" },
-  { code: "en", label: "English", sub: "English (United States / Global)" },
-  { code: "pt", label: "Português", sub: "Português (Brasil)" },
-];
-
-const GOALS: { code: Goal; icon: string; title: string; desc: string }[] = [
-  {
-    code: "volumen",
-    icon: "↗",
-    title: "Aumentar Volumen e Hipertrofia",
-    desc: "Enfoque en hipertrofia del glúteo mayor y forma redondeada.",
-  },
-  {
-    code: "definir",
-    icon: "⚡",
-    title: "Definir y Levantar",
-    desc: "Trabajo de glúteo medio y elevación para un aspecto firme.",
-  },
-  {
-    code: "grasa",
-    icon: "\u{1F525}",
-    title: "Reducir Grasa y Celulitis",
-    desc: "Estímulo metabólico de alta densidad para quema calórica.",
-  },
-  {
-    code: "postura",
-    icon: "\u{1F9B4}",
-    title: "Fortalecimiento y Postura",
-    desc: "Activación biomecánica para protección lumbar y estabilidad.",
-  },
-];
-
-const LEVELS: { code: Level; title: string; desc: string }[] = [
-  {
-    code: "principiante",
-    title: "Principiante",
-    desc: "Comenzando ahora o inactiva desde hace tiempo.",
-  },
-  {
-    code: "intermedia",
-    title: "Intermedia",
-    desc: "Practico ejercicio de forma ocasional.",
-  },
-  {
-    code: "avanzada",
-    title: "Avanzada",
-    desc: "Entreno regularmente y busco máxima intensidad.",
-  },
-];
-
-const GOAL_LABEL: Record<Goal, string> = {
-  volumen: "Volumen",
-  definir: "Definición",
-  grasa: "Grasa",
-  postura: "Postura",
-};
-
-const LEVEL_LABEL: Record<Level, string> = {
-  principiante: "Iniciante",
-  intermedia: "Intermedia",
-  avanzada: "Avanzada",
-};
-
 export default function Onboarding({
   onFinish,
 }: {
@@ -83,6 +20,8 @@ export default function Onboarding({
 }) {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<OnboardingData>(initialOnboardingData);
+  const t = getDictionary(data.language);
+  const ob = t.onboarding;
 
   const next = () => setStep((s) => Math.min(TOTAL_STEPS, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
@@ -103,28 +42,28 @@ export default function Onboarding({
         </div>
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-pink-700">
-            Mente &amp; Biomecánica
+            {t.brand.badge}
           </p>
           <h1 className="font-display text-lg font-bold leading-none">
-            Glúteos by Jeza · Registro
+            {ob.headerTitle}
           </h1>
         </div>
       </header>
 
       <ProgressBar value={(step / TOTAL_STEPS) * 100} />
       <p className="mb-6 mt-2 text-xs font-semibold text-ink/50">
-        Paso {step} de {TOTAL_STEPS}
+        {ob.stepOf(step, TOTAL_STEPS)}
       </p>
 
       <div className="flex-1">
         {step === 1 && (
           <StepWrap
-            badge="Idioma"
-            title="Elige tu idioma"
-            subtitle="Selecciona en qué idioma deseas ver la aplicación y tus entrenamientos."
+            badge={ob.step1.badge}
+            title={ob.step1.title}
+            subtitle={ob.step1.subtitle}
           >
             <div className="flex flex-col gap-3">
-              {LANGUAGES.map((l) => (
+              {ob.languages.map((l) => (
                 <SelectCard
                   key={l.code}
                   title={l.label}
@@ -139,24 +78,24 @@ export default function Onboarding({
 
         {step === 2 && (
           <StepWrap
-            badge="Registro"
-            title="¡Bienvenida al Desafío!"
-            subtitle="Para registrar tu perfil y personalizar tu progreso, ingresa tu nombre y correo."
+            badge={ob.step2.badge}
+            title={ob.step2.title}
+            subtitle={ob.step2.subtitle}
           >
             <div className="flex flex-col gap-4">
-              <Field label="Tu nombre">
+              <Field label={ob.step2.nameLabel}>
                 <input
                   className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 outline-none focus:border-pink-600"
-                  placeholder="Ej: Jesica"
+                  placeholder={ob.step2.namePlaceholder}
                   value={data.name}
                   onChange={(e) => setData({ ...data, name: e.target.value })}
                 />
               </Field>
-              <Field label="Tu correo electrónico">
+              <Field label={ob.step2.emailLabel}>
                 <input
                   type="email"
                   className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 outline-none focus:border-pink-600"
-                  placeholder="Ej: jesica@email.com"
+                  placeholder={ob.step2.emailPlaceholder}
                   value={data.email}
                   onChange={(e) => setData({ ...data, email: e.target.value })}
                 />
@@ -167,12 +106,12 @@ export default function Onboarding({
 
         {step === 3 && (
           <StepWrap
-            badge="Objetivo"
-            title="¿Qué es lo que más deseas lograr?"
-            subtitle="Selecciona el enfoque principal de tu transformación en los próximos 28 días."
+            badge={ob.step3.badge}
+            title={ob.step3.title}
+            subtitle={ob.step3.subtitle}
           >
             <div className="flex flex-col gap-3">
-              {GOALS.map((g) => (
+              {ob.step3.goals.map((g) => (
                 <SelectCard
                   key={g.code}
                   icon={g.icon}
@@ -188,12 +127,12 @@ export default function Onboarding({
 
         {step === 4 && (
           <StepWrap
-            badge="Nivel"
-            title="¿Cuál es tu nivel de entrenamiento?"
-            subtitle="Esto ayudará a calibrar los intervalos de tu entrenamiento."
+            badge={ob.step4.badge}
+            title={ob.step4.title}
+            subtitle={ob.step4.subtitle}
           >
             <div className="flex flex-col gap-3">
-              {LEVELS.map((l) => (
+              {ob.step4.levels.map((l) => (
                 <SelectCard
                   key={l.code}
                   title={l.title}
@@ -208,9 +147,9 @@ export default function Onboarding({
 
         {step === 5 && (
           <StepWrap
-            badge="Frecuencia"
-            title="¿Cuántas veces a la semana quieres entrenar?"
-            subtitle="Define tu meta semanal de entrenamientos para seguir tu panel."
+            badge={ob.step5.badge}
+            title={ob.step5.title}
+            subtitle={ob.step5.subtitle}
           >
             <div className="flex gap-3">
               {[3, 4, 5].map((f) => (
@@ -224,9 +163,9 @@ export default function Onboarding({
                       : "border-black/10 bg-white text-ink")
                   }
                 >
-                  <span className="block text-2xl font-black">{f}x</span>
+                  <span className="block text-2xl font-bold">{f}x</span>
                   <span className="block text-xs font-semibold opacity-80">
-                    por semana
+                    {ob.step5.perWeek}
                   </span>
                 </button>
               ))}
@@ -235,42 +174,46 @@ export default function Onboarding({
         )}
 
         {step === 6 && (
-          <StepWrap badge="¡Perfil Listo!" title={`¡Registro Confirmado, ${data.name || "Alumna"}!`}
-            subtitle="Tu plan de 28 días ha sido configurado con éxito bajo tu guía personalizada.">
+          <StepWrap
+            badge={ob.step6.badge}
+            title={`${ob.step6.titlePrefix}${data.name || ob.step6.defaultName}!`}
+            subtitle={ob.step6.subtitle}
+          >
             <Card>
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-600 font-display text-lg font-black text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-600 font-display text-lg font-bold text-white">
                   {(data.name || "A").charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-display font-extrabold">{data.name || "Alumna"}</p>
+                  <p className="font-display font-bold">
+                    {data.name || ob.step6.defaultName}
+                  </p>
                   <p className="text-sm text-ink/50">{data.email}</p>
                   <span className="mt-1 inline-block rounded-full bg-mint-50 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wide text-mint-600">
-                    Alumna Registrada
+                    {ob.step6.profileBadge}
                   </span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-pink-50 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-ink/40">
-                    Objetivo
+                    {ob.step6.objetivoLabel}
                   </p>
-                  <p className="font-display font-extrabold text-pink-700">
-                    {data.goal ? GOAL_LABEL[data.goal] : "—"}
+                  <p className="font-display font-bold text-pink-700">
+                    {data.goal ? ob.goalLabels[data.goal] : "—"}
                   </p>
                 </div>
                 <div className="rounded-xl bg-pink-50 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-ink/40">
-                    Nivel
+                    {ob.step6.nivelLabel}
                   </p>
-                  <p className="font-display font-extrabold text-pink-700">
-                    {data.level ? LEVEL_LABEL[data.level] : "—"}
+                  <p className="font-display font-bold text-pink-700">
+                    {data.level ? ob.levelLabels[data.level] : "—"}
                   </p>
                 </div>
               </div>
               <div className="mt-4 rounded-xl bg-mint-50 p-3 text-sm text-ink/70">
-                💬 "El progreso vendrá de la consistencia diaria. Cada
-                repetición activará tus fibras profundas."
+                💬 {ob.step6.coachMessage}
               </div>
             </Card>
           </StepWrap>
@@ -280,7 +223,7 @@ export default function Onboarding({
       <div className="mt-6 flex items-center gap-3">
         {step > 1 && (
           <GhostButton onClick={back}>
-            <span>←</span> Volver
+            <span>←</span> {ob.backBtn}
           </GhostButton>
         )}
         <PrimaryButton
@@ -288,7 +231,7 @@ export default function Onboarding({
           disabled={!canContinue}
           onClick={() => (step === TOTAL_STEPS ? onFinish(data) : next())}
         >
-          {step === TOTAL_STEPS ? "Acceder a mi panel 🚀" : "Continuar →"}
+          {step === TOTAL_STEPS ? ob.finishBtn : ob.continueBtn}
         </PrimaryButton>
       </div>
     </div>

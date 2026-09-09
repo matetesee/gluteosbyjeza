@@ -1,19 +1,12 @@
 import { useMemo, useState } from "react";
 import type { OnboardingData } from "../types";
+import { getDictionary } from "../i18n";
 import { buildPlan } from "../data/plan";
 import Entrenar from "./tabs/Entrenar";
 import Nutricion from "./tabs/Nutricion";
 import Progreso from "./tabs/Progreso";
 import Coach from "./tabs/Coach";
 import Ajustes from "./tabs/Ajustes";
-
-const NAV_ITEMS = [
-  { key: "entrenar", label: "Entrenar", icon: "🏋️" },
-  { key: "nutricion", label: "Nutrición", icon: "🥗" },
-  { key: "progreso", label: "Progreso", icon: "📈" },
-  { key: "coach", label: "Coach", icon: "🧑‍🏫" },
-  { key: "ajustes", label: "Ajustes", icon: "⚙️" },
-];
 
 export default function Dashboard({
   data,
@@ -27,10 +20,19 @@ export default function Dashboard({
   const [tab, setTab] = useState("entrenar");
   const [completed, setCompleted] = useState(false);
   const [messageIdx, setMessageIdx] = useState(0);
-  const plan = useMemo(() => buildPlan(), []);
+  const t = getDictionary(data.language);
+  const plan = useMemo(() => buildPlan(data.language), [data.language]);
   const today = plan[0];
 
-  const displayName = data.name || "Alumna";
+  const displayName = data.name || t.onboarding.step6.defaultName;
+
+  const NAV_ITEMS = [
+    { key: "entrenar", label: t.nav.entrenar, icon: "🏋️" },
+    { key: "nutricion", label: t.nav.nutricion, icon: "🥗" },
+    { key: "progreso", label: t.nav.progreso, icon: "📈" },
+    { key: "coach", label: t.nav.coach, icon: "🧑‍🏫" },
+    { key: "ajustes", label: t.nav.ajustes, icon: "⚙️" },
+  ];
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-md pb-24">
@@ -41,10 +43,10 @@ export default function Dashboard({
           </div>
           <div>
             <p className="font-display text-sm font-bold leading-none">
-              Glúteos by Jeza
+              {t.brand.name}
             </p>
             <p className="text-[9px] font-semibold uppercase tracking-wide text-ink/40">
-              Método Glúteos &amp; Tren Inferior
+              {t.brand.tagline}
             </p>
           </div>
         </div>
@@ -52,7 +54,7 @@ export default function Dashboard({
           <span className="rounded-full bg-pink-50 px-3 py-1 text-pink-700">
             {displayName}
           </span>
-          <button onClick={() => setTab("ajustes")} aria-label="Ajustes">
+          <button onClick={() => setTab("ajustes")} aria-label={t.nav.ajustes}>
             ⚙️
           </button>
         </div>
@@ -62,25 +64,29 @@ export default function Dashboard({
         {tab === "entrenar" && (
           <Entrenar
             data={data}
+            t={t}
             plan={plan}
             today={today}
             completed={completed}
             onComplete={() => setCompleted(true)}
             messageIdx={messageIdx}
-            onNextMessage={() => setMessageIdx((i) => (i + 1) % 4)}
+            onNextMessage={() =>
+              setMessageIdx((i) => (i + 1) % t.entrenar.messages.length)
+            }
           />
         )}
-        {tab === "nutricion" && <Nutricion />}
+        {tab === "nutricion" && <Nutricion t={t} />}
         {tab === "progreso" && (
           <Progreso
+            t={t}
             streak={completed ? 1 : 0}
             totalWorkouts={completed ? 1 : 0}
             totalMinutes={completed ? 25 : 0}
           />
         )}
-        {tab === "coach" && <Coach />}
+        {tab === "coach" && <Coach t={t} />}
         {tab === "ajustes" && (
-          <Ajustes data={data} onUpdateProfile={onUpdateProfile} onReset={onReset} />
+          <Ajustes data={data} t={t} onUpdateProfile={onUpdateProfile} onReset={onReset} />
         )}
       </main>
 

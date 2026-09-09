@@ -1,69 +1,8 @@
+import type { Dictionary } from "../../i18n";
 import { Card } from "../../components/ui";
 
-const MODULES = [
-  {
-    icon: "📱",
-    title: "App Exclusiva del Desafío 28D",
-    desc: "Entrenamientos guiados en video paso a paso con seguimiento de días y marcas.",
-    cta: "Abrir Entrenamientos",
-  },
-  {
-    icon: "🏋️‍♀️",
-    title: "Rutinas de 8 a 10 min por día",
-    desc: "Activación neuromuscular progresiva sin gimnasio, enfocada en volumen e hipertrofia.",
-    cta: "Ver Rutinas",
-  },
-  {
-    icon: "🥗",
-    title: "Guía Nutricional de Apoyo",
-    desc: "Plan práctico y recetas para sumar volumen, firmeza y definición.",
-    cta: "Abrir Guía Nutricional",
-  },
-];
-
-const BONUSES = [
-  {
-    icon: "⚡",
-    title: "Bono 1 · Rutina Rápida de 15 Minutos",
-    desc: "Circuito exprés de alta intensidad para los días con poco tiempo.",
-  },
-  {
-    icon: "📅",
-    title: "Bono 2 · Calendario Imprimible de Progreso",
-    desc: "Planificador visual para marcar cada día completado y medir tu evolución.",
-  },
-  {
-    icon: "🧘",
-    title: "Bono 3 · Guía de Movilidad de Cadera",
-    desc: "Calentamiento dinámico para preparar la articulación antes de entrenar.",
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    initial: "M",
-    name: "Alumna verificada",
-    days: "28/28 entrenamientos",
-    quote:
-      "No pensé que entrenar en casa iba a servir. La técnica bien hecha marcó la diferencia.",
-  },
-  {
-    initial: "J",
-    name: "Alumna verificada",
-    days: "27/28 entrenamientos",
-    quote:
-      "El seguimiento diario me ayudó a sostener la constancia, que era lo que más me costaba.",
-  },
-  {
-    initial: "C",
-    name: "Alumna verificada",
-    days: "28/28 entrenamientos",
-    quote:
-      "Los entrenamientos cortos pero intensos cambiaron mi rutina sin necesitar gimnasio.",
-  },
-];
-
-export default function Coach() {
+export default function Coach({ t }: { t: Dictionary }) {
+  const ct = t.coach;
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -73,50 +12,39 @@ export default function Coach() {
           </div>
           <div>
             <span className="inline-block rounded-full bg-mint-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-mint-600">
-              ✓ Coach Verificado
+              {ct.verifiedBadge}
             </span>
-            <h2 className="mt-1 font-display text-lg font-bold">
-              Jeza · Glúteos by Jeza
-            </h2>
-            <p className="text-xs text-ink/50">
-              Especialista en activación del glúteo mayor y medio
-            </p>
+            <h2 className="mt-1 font-display text-lg font-bold">{ct.coachName}</h2>
+            <p className="text-xs text-ink/50">{ct.coachSpecialty}</p>
           </div>
         </div>
         <div className="mt-4 rounded-xl bg-pink-50 p-3 text-sm italic text-ink/70">
-          "El glúteo no es solo estética: es el motor de tu cuerpo."
+          {ct.coachQuote}
         </div>
       </Card>
 
       <Card className="bg-gradient-to-br from-pink-600 to-pink-700 text-white">
         <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide">
-          Desafío Glúteos 28D
+          {ct.challengeBadge}
         </span>
-        <h3 className="mt-2 font-display text-lg font-bold">
-          Método completo + bonos incluidos
-        </h3>
-        <p className="mt-1 text-sm text-white/85">
-          Acceso total a entrenamientos guiados, calculadora de nutrición y
-          los 3 bonos gratuitos del desafío.
-        </p>
+        <h3 className="mt-2 font-display text-lg font-bold">{ct.challengeTitle}</h3>
+        <p className="mt-1 text-sm text-white/85">{ct.challengeDesc}</p>
         <div className="mt-3 flex gap-4 text-xs font-semibold">
-          <span>⚡ 100% sin equipo</span>
-          <span>📅 28 días para cambiar</span>
+          <span>{ct.noEquipment}</span>
+          <span>{ct.daysToChange}</span>
         </div>
       </Card>
 
       <Card>
-        <h3 className="mb-3 font-display text-base font-bold">
-          Módulos Principales
-        </h3>
+        <h3 className="mb-3 font-display text-base font-bold">{ct.modulesTitle}</h3>
         <div className="flex flex-col gap-3">
-          {MODULES.map((m) => (
+          {ct.modules.map((m) => (
             <div key={m.title} className="rounded-xl border border-black/5 p-3">
               <div className="flex items-start gap-3">
                 <span className="text-xl">{m.icon}</span>
                 <div className="flex-1">
                   <span className="mb-1 inline-block rounded-full bg-mint-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-mint-600">
-                    Incluido
+                    {ct.includedBadge}
                   </span>
                   <p className="font-display text-sm font-bold">{m.title}</p>
                   <p className="text-xs text-ink/50">{m.desc}</p>
@@ -131,15 +59,10 @@ export default function Coach() {
       </Card>
 
       <Card>
-        <h3 className="mb-3 font-display text-base font-bold">
-          🎁 Bonos Gratuitos
-        </h3>
+        <h3 className="mb-3 font-display text-base font-bold">{ct.bonusesTitle}</h3>
         <div className="flex flex-col gap-3">
-          {BONUSES.map((b) => (
-            <div
-              key={b.title}
-              className="flex items-start gap-3 rounded-xl bg-mint-50 p-3"
-            >
+          {ct.bonuses.map((b) => (
+            <div key={b.title} className="flex items-start gap-3 rounded-xl bg-mint-50 p-3">
               <span className="text-xl">{b.icon}</span>
               <div className="flex-1">
                 <p className="font-display text-sm font-bold">{b.title}</p>
@@ -152,44 +75,38 @@ export default function Coach() {
 
       <Card>
         <h3 className="mb-1 font-display text-base font-bold">
-          Historias de Éxito
+          {ct.testimonialsTitle}
         </h3>
-        <p className="mb-3 text-xs text-ink/50">
-          Resultados de alumnas del Desafío 28D
-        </p>
+        <p className="mb-3 text-xs text-ink/50">{ct.testimonialsSubtitle}</p>
         <div className="flex flex-col gap-3">
-          {TESTIMONIALS.map((t, i) => (
+          {ct.testimonials.map((tm, i) => (
             <div key={i} className="rounded-xl border border-black/5 p-3">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-600 text-xs font-bold text-white">
-                  {t.initial}
+                  {tm.initial}
                 </div>
                 <div>
-                  <p className="text-xs font-bold">{t.name}</p>
-                  <p className="text-[10px] text-ink/40">
-                    ★★★★★ · {t.days}
-                  </p>
+                  <p className="text-xs font-bold">{tm.name}</p>
+                  <p className="text-[10px] text-ink/40">★★★★★ · {tm.days}</p>
                 </div>
               </div>
-              <p className="mt-2 text-sm italic text-ink/70">"{t.quote}"</p>
+              <p className="mt-2 text-sm italic text-ink/70">"{tm.quote}"</p>
             </div>
           ))}
         </div>
       </Card>
 
       <Card>
-        <h3 className="mb-3 font-display text-base font-bold">
-          Conectate con tu Coach
-        </h3>
+        <h3 className="mb-3 font-display text-base font-bold">{ct.connectTitle}</h3>
         <div className="flex flex-col gap-2 text-sm">
           <a className="flex items-center gap-2 rounded-xl bg-black/[0.03] px-3 py-2" href="#">
-            📷 Instagram
+            {ct.instagram}
           </a>
           <a className="flex items-center gap-2 rounded-xl bg-black/[0.03] px-3 py-2" href="#">
-            ▶️ YouTube
+            {ct.youtube}
           </a>
           <a className="flex items-center gap-2 rounded-xl bg-black/[0.03] px-3 py-2" href="#">
-            ✉️ Email directo
+            {ct.email}
           </a>
         </div>
       </Card>

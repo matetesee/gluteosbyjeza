@@ -1,28 +1,21 @@
 import { useState } from "react";
+import type { Dictionary } from "../../i18n";
 import { Card, PrimaryButton } from "../../components/ui";
 
 type Biotype = "ecto" | "meso" | "endo";
-type Goal = "hipertrofia" | "definir" | "tonificar";
+type NutriGoal = "hipertrofia" | "definir" | "tonificar";
 
-const ACTIVITY_LEVELS = [
-  { value: 1.2, label: "Sedentaria / poco movimiento" },
-  { value: 1.375, label: "Entreno leve 1-2x por semana" },
-  { value: 1.55, label: "Desafío 28D moderado 3-4x/sem" },
-  { value: 1.725, label: "Entreno intenso 5-6x por semana" },
-  { value: 1.9, label: "Atleta / doble turno" },
-];
+const GOAL_DELTA: Record<NutriGoal, number> = {
+  hipertrofia: 300,
+  definir: -300,
+  tonificar: 0,
+};
 
-const BIOTYPES: { value: Biotype; title: string; desc: string; fatPerKg: number }[] = [
-  { value: "ecto", title: "Ectomorfo", desc: "Metabolismo rápido", fatPerKg: 0.8 },
-  { value: "meso", title: "Mesomorfo", desc: "Equilibrio muscular", fatPerKg: 1.0 },
-  { value: "endo", title: "Endomorfo", desc: "Sensible a carbohidratos", fatPerKg: 1.2 },
-];
-
-const GOALS: { value: Goal; title: string; desc: string; delta: number }[] = [
-  { value: "hipertrofia", title: "Hipertrofia Glútea", desc: "+300 kcal superávit", delta: 300 },
-  { value: "definir", title: "Secar y Definir", desc: "-300 kcal, preservando músculo", delta: -300 },
-  { value: "tonificar", title: "Tonificar / Recomposición", desc: "Mantenimiento", delta: 0 },
-];
+const BIOTYPE_FAT_PER_KG: Record<Biotype, number> = {
+  ecto: 0.8,
+  meso: 1.0,
+  endo: 1.2,
+};
 
 interface Result {
   bmr: number;
@@ -35,25 +28,24 @@ interface Result {
   fiber: number;
 }
 
-export default function Nutricion() {
+export default function Nutricion({ t }: { t: Dictionary }) {
+  const nt = t.nutricion;
   const [weight, setWeight] = useState(60);
   const [height, setHeight] = useState(163);
   const [age, setAge] = useState(28);
   const [biotype, setBiotype] = useState<Biotype>("meso");
   const [activity, setActivity] = useState(1.55);
-  const [goal, setGoal] = useState<Goal>("hipertrofia");
+  const [goal, setGoal] = useState<NutriGoal>("hipertrofia");
   const [meals, setMeals] = useState(4);
   const [result, setResult] = useState<Result | null>(null);
 
   function calculate() {
     const bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     const tdee = bmr * activity;
-    const goalDelta = GOALS.find((g) => g.value === goal)?.delta ?? 0;
-    const kcal = Math.round(tdee + goalDelta);
+    const kcal = Math.round(tdee + GOAL_DELTA[goal]);
 
     const protein = Math.round(weight * 2.2);
-    const fatPerKg = BIOTYPES.find((b) => b.value === biotype)?.fatPerKg ?? 1;
-    const fat = Math.round(weight * fatPerKg);
+    const fat = Math.round(weight * BIOTYPE_FAT_PER_KG[biotype]);
     const remaining = kcal - protein * 4 - fat * 9;
     const carbs = Math.max(0, Math.round(remaining / 4));
 
@@ -72,32 +64,27 @@ export default function Nutricion() {
     <div className="flex flex-col gap-4">
       <Card>
         <span className="inline-block rounded-full bg-pink-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-pink-700">
-          Nutrición de Alta Performance
+          {nt.headerBadge}
         </span>
-        <h2 className="mt-2 font-display text-xl font-bold">
-          Calculadora de Macros
-        </h2>
-        <p className="mt-1 text-sm text-ink/60">
-          Calculá tus macronutrientes exactos para maximizar el crecimiento
-          glúteo de tu desafío de 28 días.
-        </p>
+        <h2 className="mt-2 font-display text-xl font-bold">{nt.title}</h2>
+        <p className="mt-1 text-sm text-ink/60">{nt.subtitle}</p>
       </Card>
 
       <Card>
         <h3 className="mb-3 font-display text-sm font-bold uppercase tracking-wide text-ink/50">
-          Parámetros
+          {nt.paramsTitle}
         </h3>
         <div className="mb-3 grid grid-cols-3 gap-2">
-          <NumberField label="Peso (kg)" value={weight} onChange={setWeight} />
-          <NumberField label="Altura (cm)" value={height} onChange={setHeight} />
-          <NumberField label="Edad" value={age} onChange={setAge} />
+          <NumberField label={nt.weightLabel} value={weight} onChange={setWeight} />
+          <NumberField label={nt.heightLabel} value={height} onChange={setHeight} />
+          <NumberField label={nt.ageLabel} value={age} onChange={setAge} />
         </div>
 
         <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink/50">
-          Biotipo corporal
+          {nt.biotypeLabel}
         </p>
         <div className="mb-3 grid grid-cols-3 gap-2">
-          {BIOTYPES.map((b) => (
+          {nt.biotypes.map((b) => (
             <button
               key={b.value}
               onClick={() => setBiotype(b.value)}
@@ -117,14 +104,14 @@ export default function Nutricion() {
         </div>
 
         <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink/50">
-          Nivel de actividad
+          {nt.activityLabel}
         </p>
         <select
           value={activity}
           onChange={(e) => setActivity(Number(e.target.value))}
           className="mb-3 w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm"
         >
-          {ACTIVITY_LEVELS.map((a) => (
+          {nt.activityLevels.map((a) => (
             <option key={a.value} value={a.value}>
               {a.label}
             </option>
@@ -132,10 +119,10 @@ export default function Nutricion() {
         </select>
 
         <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink/50">
-          Objetivo principal
+          {nt.goalLabel}
         </p>
         <div className="mb-3 flex flex-col gap-2">
-          {GOALS.map((g) => (
+          {nt.goals.map((g) => (
             <button
               key={g.value}
               onClick={() => setGoal(g.value)}
@@ -155,7 +142,7 @@ export default function Nutricion() {
         </div>
 
         <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink/50">
-          Comidas por día
+          {nt.mealsLabel}
         </p>
         <select
           value={meals}
@@ -164,27 +151,25 @@ export default function Nutricion() {
         >
           {[3, 4, 5, 6].map((m) => (
             <option key={m} value={m}>
-              {m} comidas
+              {nt.mealsOption(m)}
             </option>
           ))}
         </select>
 
-        <PrimaryButton onClick={calculate}>
-          ⚡ Calcular Macronutrientes
-        </PrimaryButton>
+        <PrimaryButton onClick={calculate}>{nt.calculateBtn}</PrimaryButton>
       </Card>
 
       {result && (
         <>
           <Card className="bg-gradient-to-br from-pink-600 to-pink-700 text-white">
             <p className="text-[10px] font-bold uppercase tracking-wide text-white/70">
-              Meta Calórica Diaria
+              {nt.dailyGoalTitle}
             </p>
-            <p className="font-display text-3xl font-extrabold">
-              {result.kcal} kcal/día
+            <p className="font-display text-3xl font-bold">
+              {nt.kcalPerDay(result.kcal)}
             </p>
             <p className="mt-1 text-xs text-white/80">
-              TMB: {result.bmr} kcal · Gasto diario: {result.tdee} kcal
+              {nt.bmrTdee(result.bmr, result.tdee)}
             </p>
             <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-white/20">
               <div
@@ -201,32 +186,28 @@ export default function Nutricion() {
               />
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[11px] font-semibold">
-              <span>Prot {Math.round((proteinKcal / totalMacroKcal) * 100)}%</span>
-              <span>Carb {Math.round((carbsKcal / totalMacroKcal) * 100)}%</span>
-              <span>Grasa {Math.round((fatKcal / totalMacroKcal) * 100)}%</span>
+              <span>{nt.macroShort.prot} {Math.round((proteinKcal / totalMacroKcal) * 100)}%</span>
+              <span>{nt.macroShort.carb} {Math.round((carbsKcal / totalMacroKcal) * 100)}%</span>
+              <span>{nt.macroShort.grasa} {Math.round((fatKcal / totalMacroKcal) * 100)}%</span>
             </div>
           </Card>
 
           <Card>
             <div className="grid grid-cols-2 gap-3">
-              <MacroStat icon="💪" label="Proteínas" value={`${result.protein}g`} sub={`${(result.protein / weight).toFixed(1)}g / kg`} />
-              <MacroStat icon="🌾" label="Carbohidratos" value={`${result.carbs}g`} sub={`${(result.carbs / weight).toFixed(1)}g / kg`} />
-              <MacroStat icon="🥑" label="Grasas Buenas" value={`${result.fat}g`} sub={`${(result.fat / weight).toFixed(1)}g / kg`} />
-              <MacroStat icon="💧" label="Agua Diaria" value={`${result.water} L`} sub={`Fibra: ${result.fiber}g/día`} />
+              <MacroStat icon="💪" label={nt.macroStats.proteinas} value={`${result.protein}g`} sub={`${(result.protein / weight).toFixed(1)}${nt.perKg}`} />
+              <MacroStat icon="🌾" label={nt.macroStats.carbohidratos} value={`${result.carbs}g`} sub={`${(result.carbs / weight).toFixed(1)}${nt.perKg}`} />
+              <MacroStat icon="🥑" label={nt.macroStats.grasas} value={`${result.fat}g`} sub={`${(result.fat / weight).toFixed(1)}${nt.perKg}`} />
+              <MacroStat icon="💧" label={nt.macroStats.agua} value={`${result.water} L`} sub={nt.fiberPerDay(result.fiber)} />
             </div>
             <div className="mt-4 rounded-xl bg-mint-50 p-3 text-xs text-ink/70">
-              <span className="font-bold text-mint-600">
-                🧠 Regla de oro:{" "}
-              </span>
-              Repartí entre 25 y 35g de proteína en cada comida y priorizá
-              carbohidratos antes y después de entrenar para maximizar la
-              activación glútea.
+              <span className="font-bold text-mint-600">{nt.goldenRuleLabel} </span>
+              {nt.goldenRuleText}
             </div>
           </Card>
 
           <Card>
             <h3 className="mb-3 font-display text-base font-bold">
-              🍽️ Distribución por Comida ({meals}x al día)
+              {nt.mealDistribution(meals)}
             </h3>
             <div className="flex flex-col gap-2">
               {Array.from({ length: meals }).map((_, i) => (
@@ -234,12 +215,14 @@ export default function Nutricion() {
                   key={i}
                   className="flex items-center justify-between rounded-xl bg-black/[0.03] px-3 py-2 text-xs"
                 >
-                  <span className="font-semibold">Comida {i + 1}</span>
+                  <span className="font-semibold">{nt.mealLabel(i + 1)}</span>
                   <span className="text-ink/50">
-                    ~{Math.round(result.kcal / meals)} kcal · P{" "}
-                    {Math.round(result.protein / meals)}g · C{" "}
-                    {Math.round(result.carbs / meals)}g · G{" "}
-                    {Math.round(result.fat / meals)}g
+                    {nt.mealMacro(
+                      Math.round(result.kcal / meals),
+                      Math.round(result.protein / meals),
+                      Math.round(result.carbs / meals),
+                      Math.round(result.fat / meals)
+                    )}
                   </span>
                 </div>
               ))}
@@ -249,30 +232,10 @@ export default function Nutricion() {
       )}
 
       <Card>
-        <h3 className="mb-3 font-display text-base font-bold">
-          Alimentos Recomendados
-        </h3>
-        <FoodGroup icon="💪" title="Proteínas nobles" items={[
-          "Pechuga de pollo grillada",
-          "Huevos enteros",
-          "Filet de merluza / salmón",
-          "Carne magra picada",
-          "Yogur griego natural",
-          "Whey protein",
-        ]} />
-        <FoodGroup icon="🌾" title="Carbohidratos complejos" items={[
-          "Batata / camote",
-          "Avena en hojuelas",
-          "Arroz integral",
-          "Banana con canela (pre-entreno)",
-          "Frutos rojos",
-        ]} />
-        <FoodGroup icon="🥑" title="Grasas hormonales" items={[
-          "Aceite de oliva extra virgen",
-          "Palta / aguacate",
-          "Almendras y nueces",
-          "Semillas de chía / lino",
-        ]} />
+        <h3 className="mb-3 font-display text-base font-bold">{nt.foodsTitle}</h3>
+        {nt.foodGroups.map((group) => (
+          <FoodGroup key={group.title} icon={group.icon} title={group.title} items={group.items} />
+        ))}
       </Card>
     </div>
   );
@@ -319,7 +282,7 @@ function MacroStat({
       <p className="text-[10px] font-bold uppercase tracking-wide text-ink/40">
         {label}
       </p>
-      <p className="font-display text-lg font-extrabold text-pink-700">
+      <p className="font-display text-lg font-bold text-pink-700">
         {value}
       </p>
       <p className="text-[10px] text-ink/40">{sub}</p>

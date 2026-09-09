@@ -1,40 +1,11 @@
 import { useState } from "react";
 import type { DayPlan, OnboardingData } from "../../types";
+import type { Dictionary } from "../../i18n";
 import { Card, PrimaryButton } from "../../components/ui";
-
-const COACH_MESSAGES = [
-  "La disciplina de hoy es el cuerpo firme y definido que verás en el espejo en pocos días.",
-  "Cada repetición de hoy es una inversión en la mujer que quieres ver mañana.",
-  "No esperes la motivación: empieza el entrenamiento y la motivación llegará con el movimiento.",
-  "Tu constancia de hoy vale más que la intensidad de un solo día.",
-];
-
-const WEEKDAY_NAMES = [
-  "domingo",
-  "lunes",
-  "martes",
-  "miércoles",
-  "jueves",
-  "viernes",
-  "sábado",
-];
-const MONTH_NAMES = [
-  "enero",
-  "febrero",
-  "marzo",
-  "abril",
-  "mayo",
-  "junio",
-  "julio",
-  "agosto",
-  "septiembre",
-  "octubre",
-  "noviembre",
-  "diciembre",
-];
 
 export default function Entrenar({
   data,
+  t,
   plan,
   today,
   completed,
@@ -43,6 +14,7 @@ export default function Entrenar({
   onNextMessage,
 }: {
   data: OnboardingData;
+  t: Dictionary;
   plan: DayPlan[];
   today: DayPlan;
   completed: boolean;
@@ -50,64 +22,61 @@ export default function Entrenar({
   messageIdx: number;
   onNextMessage: () => void;
 }) {
+  const et = t.entrenar;
   const now = new Date();
-  const displayName = data.name || "Alumna";
+  const displayName = data.name || t.onboarding.step6.defaultName;
   const [showAllDays, setShowAllDays] = useState(false);
+
+  const intensityLabel = (i: string) =>
+    (et.intensities as Record<string, string>)[i] ?? i;
 
   return (
     <div className="flex flex-col gap-4">
       <Card>
         <div className="mb-3 flex items-center justify-between text-xs text-ink/50">
           <span className="font-bold capitalize">
-            {WEEKDAY_NAMES[now.getDay()]}
+            {et.weekdays[now.getDay()]}
           </span>
           <span>
-            {now.getDate()} de {MONTH_NAMES[now.getMonth()]} de{" "}
-            {now.getFullYear()}
+            {now.getDate()} {et.months[now.getMonth()]} {now.getFullYear()}
           </span>
         </div>
         <div className="mb-4 flex items-center justify-between text-xs text-ink/50">
-          <span>Buenas, {displayName} · Seguimiento en tiempo real</span>
+          <span>{et.greeting(displayName)}</span>
         </div>
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide text-ink/40">
-              Mensaje del Coach · Día 1
+              {et.coachMessageLabel}
             </p>
             <p className="mt-2 font-display text-sm font-bold leading-snug text-ink">
-              "{COACH_MESSAGES[messageIdx]}"
+              "{et.messages[messageIdx % et.messages.length]}"
             </p>
           </div>
           <button
             onClick={onNextMessage}
             className="shrink-0 rounded-full bg-pink-50 p-2 text-pink-700"
-            aria-label="Ver otra frase motivadora"
+            aria-label={et.tipLabel}
           >
             🔄
           </button>
         </div>
         <div className="mt-4 rounded-xl bg-mint-50 p-3 text-xs text-ink/70">
-          <span className="font-bold text-mint-600">
-            💡 Consejo biomecánico del día:{" "}
-          </span>
-          No esperes la motivación: empieza el entrenamiento y la motivación
-          llegará con el movimiento.
+          <span className="font-bold text-mint-600">{et.tipLabel} </span>
+          {et.tipText}
         </div>
       </Card>
 
       <Card className="bg-gradient-to-br from-pink-600 to-pink-700 text-white">
         <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide">
-          Desafío de Glúteos de 28 Días
+          {et.challengeBadge}
         </span>
-        <h2 className="mt-3 font-display text-xl font-extrabold">
-          Hola, {displayName}!
+        <h2 className="mt-3 font-display text-xl font-bold">
+          {et.hello(displayName)}
         </h2>
-        <p className="mt-1 text-sm text-white/85">
-          Tu entrenamiento de hoy se enfoca en la activación profunda de las
-          fibras para un glúteo redondeado.
-        </p>
+        <p className="mt-1 text-sm text-white/85">{et.challengeDesc}</p>
         <button className="mt-4 flex w-full items-center justify-between rounded-2xl bg-white/15 px-4 py-3 text-sm font-bold">
-          <span>🏋️ Biblioteca (16 Ejercicios)</span>
+          <span>{et.libraryBtn}</span>
           <span>→</span>
         </button>
       </Card>
@@ -123,21 +92,16 @@ export default function Entrenar({
                   : "polygon(50% 50%, 50% 0, 50% 0)",
               }}
             />
-            <span className="font-display text-lg font-extrabold">
+            <span className="font-display text-lg font-bold">
               {completed ? "100%" : "0%"}
             </span>
           </div>
           <div className="flex-1">
-            <p className="text-xs font-bold text-ink/40">Día 1 de 28</p>
+            <p className="text-xs font-bold text-ink/40">{et.dayOf28(1)}</p>
             <h3 className="font-display text-base font-bold">
-              {completed
-                ? "¡Entrenamiento completado!"
-                : "¡Lo estás haciendo genial!"}
+              {completed ? et.doneTitle : et.notDoneTitle}
             </h3>
-            <p className="text-xs text-ink/60">
-              Solo quedan 28 días para tu transformación completa. El enfoque
-              de hoy es activación y volumen.
-            </p>
+            <p className="text-xs text-ink/60">{et.daysLeftDesc}</p>
           </div>
         </div>
       </Card>
@@ -145,24 +109,23 @@ export default function Entrenar({
       <Card>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-display text-base font-bold">
-            🔥 Entrenamiento de Hoy
+            {et.todayWorkoutTitle}
           </h3>
           <span className="rounded-full bg-pink-50 px-2 py-0.5 text-[10px] font-bold text-pink-700">
-            Día {today.day} · Sem {today.week}
+            {et.dayWeek(today.day, today.week)}
           </span>
         </div>
         <div className="mb-3 flex gap-2 text-[10px] font-bold text-ink/50">
           <span className="rounded-full bg-black/5 px-2 py-1">
-            {today.intensity} Intensidad
+            {intensityLabel(today.intensity)}
           </span>
           <span className="rounded-full bg-black/5 px-2 py-1">
-            ~{today.kcal} kcal
+            {et.kcalLabel(today.kcal)}
           </span>
         </div>
-        <h4 className="font-display text-lg font-extrabold">{today.title}</h4>
+        <h4 className="font-display text-lg font-bold">{today.title}</h4>
         <p className="mb-3 text-xs text-ink/60">
-          {today.exercises.length} ejercicios enfocados en biomecánica en
-          casa.
+          {et.exercisesCount(today.exercises.length)}
         </p>
         <ul className="mb-4 flex flex-col gap-2">
           {today.exercises.map((ex) => (
@@ -176,20 +139,20 @@ export default function Entrenar({
           ))}
         </ul>
         <PrimaryButton onClick={onComplete}>
-          {completed ? "✓ Entreno Completado" : "▶ Iniciar Entreno"}
+          {completed ? et.doneBtn : et.startBtn}
         </PrimaryButton>
       </Card>
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-display text-base font-bold">
-            Cronograma Semanal
+            {et.scheduleTitle}
           </h3>
           <button
             onClick={() => setShowAllDays((v) => !v)}
             className="flex items-center gap-1 rounded-full bg-black/5 px-3 py-1 text-[11px] font-bold"
           >
-            📅 {showAllDays ? "Ver Menos" : "Ver los 28 Días"}
+            {showAllDays ? et.seeLess : et.seeAll}
           </button>
         </div>
         <div className="flex max-h-96 flex-col gap-2 overflow-y-auto">
@@ -200,7 +163,7 @@ export default function Entrenar({
             >
               <div>
                 <p className="text-[10px] font-bold text-ink/40">
-                  {d.weekday} · Día {d.day} · Sem {d.week}
+                  {et.weekdayDayWeek(d.weekday, d.day, d.week)}
                 </p>
                 <p className="text-sm font-semibold">{d.title}</p>
               </div>
@@ -215,11 +178,10 @@ export default function Entrenar({
           <span className="text-2xl">🏆</span>
           <div>
             <h3 className="font-display text-base font-bold">
-              Meta de la Semana
+              {et.weekGoalTitle}
             </h3>
             <p className="text-xs text-ink/60">
-              Completar {data.frequency} entrenamientos intensos. ¡Ya hiciste{" "}
-              {completed ? 1 : 0}!
+              {et.weekGoalDesc(data.frequency, completed ? 1 : 0)}
             </p>
           </div>
         </div>

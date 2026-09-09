@@ -1,29 +1,19 @@
 import { useRef, useState } from "react";
+import type { Dictionary } from "../../i18n";
 import { Card } from "../../components/ui";
 
-interface Checkpoint {
-  key: string;
-  icon: string;
-  label: string;
-}
-
-const CHECKPOINTS: Checkpoint[] = [
-  { key: "workout", icon: "🏋️", label: "Entrenamiento de glúteos completado" },
-  { key: "protein", icon: "🍗", label: "Meta de proteína y calorías registrada" },
-  { key: "water", icon: "💧", label: "Hidratación diaria cumplida (2.5L+)" },
-  { key: "mobility", icon: "🧘", label: "5 min de movilidad y recuperación activa" },
-  { key: "photo", icon: "📸", label: "Check-in semanal de fotos o medidas" },
-];
-
 export default function Progreso({
+  t,
   streak,
   totalWorkouts,
   totalMinutes,
 }: {
+  t: Dictionary;
   streak: number;
   totalWorkouts: number;
   totalMinutes: number;
 }) {
+  const pt = t.progreso;
   const [done, setDone] = useState<Set<string>>(new Set());
   const [photos, setPhotos] = useState<{ start?: string; current?: string }>({});
   const [records, setRecords] = useState<Array<{ id: number; name: string; value: string }>>([]);
@@ -61,33 +51,30 @@ export default function Progreso({
   }
 
   const weeks = [
-    { label: "Sem 1", value: Math.min(4, totalWorkouts) },
-    { label: "Sem 2", value: 0 },
-    { label: "Sem 3", value: 0 },
-    { label: "Sem 4", value: 0 },
+    { label: pt.weekLabel(1), value: Math.min(4, totalWorkouts) },
+    { label: pt.weekLabel(2), value: 0 },
+    { label: pt.weekLabel(3), value: 0 },
+    { label: pt.weekLabel(4), value: 0 },
   ];
   const maxWeek = Math.max(1, ...weeks.map((w) => w.value));
 
   return (
     <div className="flex flex-col gap-4">
       <Card className="bg-mint-50">
-        <p className="text-xs font-semibold text-mint-600">
-          🔒 App 100% privada · Tu progreso, fotos y checkpoints se guardan
-          únicamente en tu dispositivo.
-        </p>
+        <p className="text-xs font-semibold text-mint-600">{pt.privacyNote}</p>
       </Card>
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-display text-base font-bold">
-            ✅ Checkpoints de Hoy
+            {pt.checkpointsTitle}
           </h3>
           <span className="rounded-full bg-pink-50 px-2 py-0.5 text-[11px] font-bold text-pink-700">
-            {done.size} / {CHECKPOINTS.length}
+            {done.size} / {pt.checkpoints.length}
           </span>
         </div>
         <div className="flex flex-col gap-2">
-          {CHECKPOINTS.map((c) => (
+          {pt.checkpoints.map((c) => (
             <button
               key={c.key}
               onClick={() => toggleCheckpoint(c.key)}
@@ -114,16 +101,16 @@ export default function Progreso({
       </Card>
 
       <div className="grid grid-cols-3 gap-3">
-        <StatBox icon="🔥" value={streak} label="días seguidos" />
-        <StatBox icon="🏋️" value={totalWorkouts} label="entrenos totales" />
-        <StatBox icon="⏱️" value={totalMinutes} label="minutos totales" />
+        <StatBox icon="🔥" value={streak} label={pt.statLabels.streak} />
+        <StatBox icon="🏋️" value={totalWorkouts} label={pt.statLabels.workouts} />
+        <StatBox icon="⏱️" value={totalMinutes} label={pt.statLabels.minutes} />
       </div>
 
       <Card>
         <h3 className="mb-1 font-display text-base font-bold">
-          Frecuencia Semanal
+          {pt.weeklyFreqTitle}
         </h3>
-        <p className="mb-3 text-xs text-ink/50">Últimas 4 semanas</p>
+        <p className="mb-3 text-xs text-ink/50">{pt.last4Weeks}</p>
         <div className="flex items-end justify-between gap-2" style={{ height: 90 }}>
           {weeks.map((w) => (
             <div key={w.label} className="flex flex-1 flex-col items-center gap-1">
@@ -139,16 +126,18 @@ export default function Progreso({
 
       <Card>
         <h3 className="mb-3 font-display text-base font-bold">
-          Antes y Después
+          {pt.beforeAfterTitle}
         </h3>
         <div className="grid grid-cols-2 gap-3">
           <PhotoSlot
-            label="Inicio"
+            label={pt.photoStart}
+            hint={pt.tapToAddPhoto}
             src={photos.start}
             onClick={() => startInputRef.current?.click()}
           />
           <PhotoSlot
-            label="Actual"
+            label={pt.photoCurrent}
+            hint={pt.tapToAddPhoto}
             src={photos.current}
             onClick={() => currentInputRef.current?.click()}
           />
@@ -169,33 +158,32 @@ export default function Progreso({
         />
         {photos.start && photos.current && (
           <div className="mt-3 rounded-xl bg-mint-50 p-3 text-xs text-ink/70">
-            ✨ ¡Segui subiendo fotos cada semana para ver tu evolución
-            comparada lado a lado!
+            {pt.photosEncouragement}
           </div>
         )}
       </Card>
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-display text-base font-bold">Mis Récords</h3>
+          <h3 className="font-display text-base font-bold">{pt.recordsTitle}</h3>
           <button
             onClick={() => setShowAddRecord((v) => !v)}
             className="rounded-full bg-pink-50 px-3 py-1 text-[11px] font-bold text-pink-700"
           >
-            + Nuevo Récord
+            {pt.newRecordBtn}
           </button>
         </div>
 
         {showAddRecord && (
           <div className="mb-3 flex flex-col gap-2 rounded-xl border border-black/10 p-3">
             <input
-              placeholder="Ej: Puente de glúteo"
+              placeholder={pt.recordNamePlaceholder}
               value={recordName}
               onChange={(e) => setRecordName(e.target.value)}
               className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-pink-600"
             />
             <input
-              placeholder="Ej: 20kg x 12 reps"
+              placeholder={pt.recordValuePlaceholder}
               value={recordValue}
               onChange={(e) => setRecordValue(e.target.value)}
               className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-pink-600"
@@ -204,16 +192,16 @@ export default function Progreso({
               onClick={addRecord}
               className="rounded-lg bg-pink-600 py-2 text-sm font-bold text-white"
             >
-              Guardar
+              {pt.saveBtn}
             </button>
           </div>
         )}
 
         {records.length === 0 ? (
           <div className="rounded-xl bg-black/[0.03] p-4 text-center text-sm text-ink/50">
-            🏆 Todavía no registraste ninguna marca.
+            {pt.noRecords}
             <br />
-            ¡Tocá "+ Nuevo Récord" para registrar tu primera marca!
+            {pt.noRecordsHint}
           </div>
         ) : (
           <div className="flex flex-col gap-2">
@@ -237,7 +225,7 @@ function StatBox({ icon, value, label }: { icon: string; value: number; label: s
   return (
     <div className="rounded-2xl border border-black/5 bg-white p-3 text-center shadow-sm">
       <p className="text-lg">{icon}</p>
-      <p className="font-display text-xl font-extrabold text-pink-700">{value}</p>
+      <p className="font-display text-xl font-bold text-pink-700">{value}</p>
       <p className="text-[10px] text-ink/40">{label}</p>
     </div>
   );
@@ -245,10 +233,12 @@ function StatBox({ icon, value, label }: { icon: string; value: number; label: s
 
 function PhotoSlot({
   label,
+  hint,
   src,
   onClick,
 }: {
   label: string;
+  hint: string;
   src?: string;
   onClick: () => void;
 }) {
@@ -263,7 +253,7 @@ function PhotoSlot({
         <>
           <span className="text-2xl">📷</span>
           <span className="font-semibold">{label}</span>
-          <span className="px-2 text-center text-[10px]">Toca para añadir foto</span>
+          <span className="px-2 text-center text-[10px]">{hint}</span>
         </>
       )}
     </button>

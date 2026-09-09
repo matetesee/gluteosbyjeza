@@ -1,26 +1,26 @@
 import { useState } from "react";
-import type { Language, OnboardingData } from "../../types";
+import type { OnboardingData } from "../../types";
+import type { Dictionary } from "../../i18n";
 import { Card, PrimaryButton } from "../../components/ui";
-
-const LANGUAGES: { code: Language; flag: string; label: string }[] = [
-  { code: "es", flag: "🇪🇸", label: "Español" },
-  { code: "en", flag: "🇺🇸", label: "English" },
-  { code: "pt", flag: "🇧🇷", label: "Português" },
-];
 
 export default function Ajustes({
   data,
+  t,
   onUpdateProfile,
   onReset,
 }: {
   data: OnboardingData;
+  t: Dictionary;
   onUpdateProfile: (partial: Partial<OnboardingData>) => void;
   onReset: () => void;
 }) {
+  const at = t.ajustes;
   const [name, setName] = useState(data.name);
   const [email, setEmail] = useState(data.email);
   const [saved, setSaved] = useState(false);
-  const [notifStatus, setNotifStatus] = useState<string>("No solicitado");
+  const [notifStatusKey, setNotifStatusKey] =
+    useState<keyof typeof at.statusValues>("none");
+  const notifStatus = at.statusValues[notifStatusKey];
 
   function saveProfile() {
     onUpdateProfile({ name, email });
@@ -30,22 +30,22 @@ export default function Ajustes({
 
   async function testNotification() {
     if (!("Notification" in window)) {
-      setNotifStatus("No soportado en este navegador");
+      setNotifStatusKey("unsupported");
       return;
     }
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
-      new Notification("Glúteos by Jeza 🍑", {
-        body: "¡Es hora de tu entrenamiento de glúteos!",
+      new Notification(at.notificationTitle, {
+        body: at.notificationBody,
       });
-      setNotifStatus("Permitido ✓");
+      setNotifStatusKey("granted");
     } else {
-      setNotifStatus("Bloqueado por el navegador");
+      setNotifStatusKey("blocked");
     }
   }
 
   function handleReset() {
-    if (confirm("¿Reiniciar el desafío? Se perderá tu progreso actual.")) {
+    if (confirm(at.resetConfirm)) {
       onReset();
     }
   }
@@ -53,11 +53,9 @@ export default function Ajustes({
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <h3 className="mb-3 font-display text-base font-bold">
-          Idioma / Language
-        </h3>
+        <h3 className="mb-3 font-display text-base font-bold">{at.languageTitle}</h3>
         <div className="grid grid-cols-3 gap-2">
-          {LANGUAGES.map((l) => (
+          {at.languages.map((l) => (
             <button
               key={l.code}
               onClick={() => onUpdateProfile({ language: l.code })}
@@ -77,49 +75,44 @@ export default function Ajustes({
 
       <Card>
         <h3 className="mb-3 font-display text-base font-bold">
-          🔔 Notificaciones Push
+          {at.notificationsTitle}
         </h3>
-        <p className="mb-3 text-xs text-ink/50">
-          Exactamente 2 recordatorios diarios
-        </p>
+        <p className="mb-3 text-xs text-ink/50">{at.notificationsSubtitle}</p>
         <div className="mb-3 flex flex-col gap-2">
           <div className="flex items-center justify-between rounded-xl bg-black/[0.03] px-3 py-2 text-sm">
             <div>
-              <p className="font-semibold">09:00 · Entrenamiento</p>
-              <p className="text-xs text-ink/50">Entrenamiento de glúteos mañanero 🍑</p>
+              <p className="font-semibold">{at.reminder1.title}</p>
+              <p className="text-xs text-ink/50">{at.reminder1.desc}</p>
             </div>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-black/[0.03] px-3 py-2 text-sm">
             <div>
-              <p className="font-semibold">19:00 · Check-in</p>
-              <p className="text-xs text-ink/50">Chequeo nocturno y nutrición 🥗</p>
+              <p className="font-semibold">{at.reminder2.title}</p>
+              <p className="text-xs text-ink/50">{at.reminder2.desc}</p>
             </div>
           </div>
         </div>
-        <p className="mb-2 text-xs text-ink/40">Estado: {notifStatus}</p>
+        <p className="mb-2 text-xs text-ink/40">
+          {at.statusLabel}: {notifStatus}
+        </p>
         <button
           onClick={testNotification}
           className="w-full rounded-xl bg-black/5 py-2.5 text-sm font-bold text-ink"
         >
-          📨 Probar Notificación Ahora
+          {at.testNotificationBtn}
         </button>
       </Card>
 
       <Card className="bg-mint-50">
-        <p className="text-xs font-semibold text-mint-600">
-          🔒 App individual 100% privada. Tus datos, metas y fotos de
-          progreso se guardan de forma aislada en tu dispositivo.
-        </p>
+        <p className="text-xs font-semibold text-mint-600">{at.privacyNote}</p>
       </Card>
 
       <Card>
-        <h3 className="mb-3 font-display text-base font-bold">
-          Cuenta y Perfil
-        </h3>
+        <h3 className="mb-3 font-display text-base font-bold">{at.accountTitle}</h3>
         <div className="flex flex-col gap-3">
           <label className="block">
             <span className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-ink/40">
-              Nombre de perfil
+              {at.nameLabel}
             </span>
             <input
               value={name}
@@ -129,7 +122,7 @@ export default function Ajustes({
           </label>
           <label className="block">
             <span className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-ink/40">
-              Email registrado
+              {at.emailLabel}
             </span>
             <input
               value={email}
@@ -138,19 +131,14 @@ export default function Ajustes({
             />
           </label>
           <PrimaryButton onClick={saveProfile}>
-            {saved ? "✓ Guardado" : "Guardar Cambios"}
+            {saved ? at.savedBtn : at.saveBtn}
           </PrimaryButton>
         </div>
       </Card>
 
       <Card>
-        <h3 className="mb-2 font-display text-base font-bold">
-          🔊 Efectos de Sonido
-        </h3>
-        <p className="text-xs text-ink/50">
-          Bips de cuenta regresiva y transición entre series durante el
-          entrenamiento activo.
-        </p>
+        <h3 className="mb-2 font-display text-base font-bold">{at.soundTitle}</h3>
+        <p className="text-xs text-ink/50">{at.soundDesc}</p>
       </Card>
 
       <Card>
@@ -158,7 +146,7 @@ export default function Ajustes({
           onClick={handleReset}
           className="w-full rounded-xl border-2 border-red-200 bg-red-50 py-3 text-sm font-bold text-red-600"
         >
-          ↺ Reiniciar Desafío
+          {at.resetBtn}
         </button>
       </Card>
     </div>
