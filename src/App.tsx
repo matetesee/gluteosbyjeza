@@ -10,5 +10,13 @@ export default function App() {
     return <Onboarding onFinish={setProfile} />;
   }
 
-  return <Dashboard data={profile} />;
+  return (
+    <Dashboard
+      data={profile}
+      onUpdateProfile={(partial) =>
+        setProfile((prev) => (prev ? { ...prev, ...partial } : prev))
+      }
+      onReset={() => setProfile(null)}
+    />
+  );
 }

@@ -105,7 +105,7 @@ export default function Onboarding({
           <p className="text-[10px] font-bold uppercase tracking-wider text-pink-700">
             Mente &amp; Biomecánica
           </p>
-          <h1 className="font-display text-lg font-extrabold leading-none">
+          <h1 className="font-display text-lg font-bold leading-none">
             Glúteos by Jeza · Registro
           </h1>
         </div>

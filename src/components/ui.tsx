@@ -3,14 +3,19 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 export function PrimaryButton({
   children,
   className = "",
+  disabled,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) {
+  const base =
+    "flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 font-display text-base font-bold transition active:scale-[0.98] ";
+  const state = disabled
+    ? "cursor-not-allowed "
+    : "bg-gradient-to-r from-pink-600 to-pink-700 text-white shadow-lg shadow-pink-600/30 ";
   return (
     <button
-      className={
-        "flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-pink-600 to-pink-700 px-6 py-4 font-display text-base font-extrabold text-white shadow-lg shadow-pink-600/30 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 " +
-        className
-      }
+      className={base + state + className}
+      disabled={disabled}
+      style={disabled ? { backgroundColor: "rgba(0,0,0,0.1)", color: "rgba(27,27,27,0.35)" } : undefined}
       {...props}
     >
       {children}
@@ -103,10 +108,10 @@ export function SelectCard({
         </span>
       )}
       <span className="flex-1">
-        <span className="block font-display text-base font-extrabold text-ink">
+        <span className="block font-display text-base font-semibold text-ink">
           {title}
         </span>
-        <span className="block text-sm text-ink/60">{description}</span>
+        <span className="block text-sm text-ink/55">{description}</span>
       </span>
       <span
         className={

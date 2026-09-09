@@ -14,33 +14,35 @@
   --color-ink: rgb(27, 27, 27);
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
 
-* {
-  box-sizing: border-box;
-}
+  * {
+    box-sizing: border-box;
+  }
 
-body {
-  margin: 0;
-  background:
-    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255, 200, 220, 0.35), transparent),
-    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(255, 200, 220, 0.25), transparent),
-    var(--color-cream);
-  background-attachment: fixed;
-  font-family: var(--font-sans);
-  color: var(--color-ink);
-  -webkit-font-smoothing: antialiased;
-}
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255, 200, 220, 0.35), transparent),
+      radial-gradient(ellipse 60% 40% at 0% 100%, rgba(255, 200, 220, 0.25), transparent),
+      var(--color-cream);
+    background-attachment: fixed;
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1,
-h2,
-h3,
-.font-display {
-  font-family: var(--font-display);
-  font-weight: 900;
-  letter-spacing: -0.01em;
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
 }
